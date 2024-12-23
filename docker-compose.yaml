@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  ams:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ams
+    ports:
+      - "8081:8081"
+    environment:
+      - APP_ENV=production
+      - PG_HOST=postgres_ams
+      - PG_PORT=5432
+      - PG_USER=admin
+      - PG_PASSWORD=admin
+      - PG_NAME=asset
+      - HTTP_PORT=8081
+      - WALLET_CLIENT_BASE_URL=http://wms:8080/api
+      - SCHEDULER_INTERVAL=5
+    networks:
+      - shared-network
+    volumes:
+      - ./envs:/app/envs
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: postgres_ams
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: asset
+    networks:
+      - shared-network
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_ams_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_ams_data:
+
+networks:
+  shared-network:
+    external: true
